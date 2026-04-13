@@ -7,9 +7,9 @@
 
 ## Overview
 
-A differential-drive robot I built to get hands-on with embedded C++ and sensor integration. It runs on an Arduino Uno and does reactive obstacle avoidance with an ultrasonic sensor, plus a 3-servo arm for basic pick-and-place.
+A differential-drive robot I built to get hands-on with embedded C++ and sensor integration. It runs on an Arduino Uno and does reactive obstacle avoidance with an ultrasonic sensor, and has a 3-servo arm for basic pick-and-place sequences.
 
-The goal wasn't to build anything novel — it was to get comfortable writing firmware that talks to real hardware: reading a sensor, driving motors through an H-bridge, and coordinating it all in a control loop.
+The goal was to get comfortable writing firmware that talks to real hardware, such as reading a sensor, driving motors through an H-bridge, and coordinating it all in a control loop.
 
 ## Hardware
 
