@@ -1,26 +1,28 @@
-# Autonomous Mobile Robot (AMR) 
+# Autonomous Mobile Robot (AMR)
 
 ![Top View](IMG_8309.jpeg)
 ![Front View](IMG_8311.jpeg)
 ![Rear View](IMG_8312.jpeg)
 ![Undercarriage Motors](IMG_8313.jpeg)
 
-## Project Overview
-**Focus:** Embedded Systems, PWM Motor Control, Sensor Integration
+## Overview
 
-This project focused on the firmware architecture and sensor integration for a differential-drive mobile robot. Utilizing a standard 4WD chassis as a testbed, I developed a C++ control loop for autonomous reactive navigation and 3-DOF manipulator control. The system integrates ultrasonic time-of-flight sensing with an H-Bridge motor driver to execute collision avoidance logic in real-time.
+A differential-drive robot I built to get hands-on with embedded C++ and sensor integration. It runs on an Arduino Uno and does reactive obstacle avoidance with an ultrasonic sensor, plus a 3-servo arm for basic pick-and-place.
 
-## System Architecture
-* **Microcontroller:** ATmega328P (Arduino Uno R3).
-* **Actuation (Locomotion):** L298N Dual H-Bridge Driver controlling 4x DC Geared Motors.
-* **Actuation (Manipulation):** 3x PWM-controlled Servos (Base, Arm, End-Effector).
-* **Perception:** HC-SR04 Ultrasonic Sensor (40 kHz) for time-of-flight distance sensing.
-* **Power Supply:** 7.4V Li-Po Bus regulated to 5V logic.
+The goal wasn't to build anything novel — it was to get comfortable writing firmware that talks to real hardware: reading a sensor, driving motors through an H-bridge, and coordinating it all in a control loop.
 
-## Electrical Wiring & Pin Mapping
+## Hardware
+
+- **Microcontroller:** Arduino Uno R3 (ATmega328P)
+- **Drive:** L298N H-bridge driving 4 DC geared motors on a 4WD chassis
+- **Arm:** 3 hobby servos (base rotation, arm lift, claw)
+- **Sensor:** HC-SR04 ultrasonic (40 kHz)
+- **Power:** 7.4V LiPo, regulated to 5V for logic
+
+## Pin Mapping
 
 | Function | Component Pin | Arduino Pin |
-|---------|---------------|-------------|
+|---|---|---|
 | Ultrasonic Trigger | TRIG | D12 |
 | Ultrasonic Echo | ECHO | D13 |
 | Left Motor Direction | IN1 | D2 |
@@ -31,25 +33,26 @@ This project focused on the firmware architecture and sensor integration for a d
 | Arm Servo | Signal | D10 |
 | Base Servo | Signal | D11 |
 
-## Firmware Implementation (C++)
+## How It Works
 
-### Autonomous Navigation Logic
-The navigation firmware operates on a reactive control loop (Finite State Machine concept):
-* **Ping Cycle:** Triggers ultrasonic pulse (10 µs) and calculates Time-of-Flight.
-* **Threshold Check:** If `distance < 25 cm`, the avoidance routine is triggered.
+### Obstacle Avoidance
 
-### Avoidance Routine
-* **State A (Braking):** PWM to 0 instantly to halt momentum.
-* **State B (Evaluation):** If `distance < 15 cm` (Critical Proximity), execute Reverse Impulse.
-* **State C (Re-route):** Execute Differential Turn (Left Motors: REV, Right Motors: FWD) until path is clear.
+The main loop pings the ultrasonic sensor every cycle — a 10 µs trigger pulse, then measure the echo and convert to distance. From there it's a simple state check:
 
-### Manipulator Control
-Implemented a standard **Pick-and-Place sequence** using blocking servo movements. Calibrated specific PWM duty cycles for the "Home," "Grip," and "Drop" positions to ensure mechanical stability without servo stall.
+- **Distance > 25 cm:** drive forward.
+- **Distance < 25 cm:** cut PWM to 0 and stop.
+- **Distance < 15 cm:** back up briefly, then do a differential turn (left motors reverse, right motors forward) until the path is clear again.
 
-## Engineering Challenges & Optimizations
-**Sensor Signal Noise**
-* **Problem:** The ultrasonic sensor produced erratic readings due to acoustic reflections on soft surfaces.
-* **Solution:** Implemented a hardware filter by physically isolating the sensor mount and refining the trigger timing logic to ensure clean echo reception.
+Not fancy, but it handles an obstacle course reliably.
 
-## Technical Retrospective
-This project served as a foundational exploration into embedded C++ and electromechanical integration. While the initial version utilized blocking delays (`delay()`), it highlighted the need for a non-blocking architecture (`millis()` timers) for future multitasking.
+### Arm Control
+
+The arm runs a hardcoded pick-and-place sequence. I manually tuned the PWM values for each servo's "home," "grip," and "drop" positions so the arm wouldn't fight itself or stall at the end of travel.
+
+## What I Ran Into
+
+The ultrasonic sensor was noisy at first — it kept returning garbage distances, especially when pointed at soft or angled surfaces where the sound scatters instead of reflecting cleanly. I fixed it by isolating the sensor physically from the chassis (it was picking up vibration) and tightening up the trigger timing so I wasn't catching leftover echoes from the previous ping.
+
+## What I'd Change
+
+The whole thing is built around `delay()`, which blocks the entire program while it runs. That's fine for a simple reactive robot, but it means the Uno can't do anything else — no watching the sensor while the arm moves, no overlapping behaviors. Rewriting the loop around `millis()` timers would be the first thing I'd do if I picked this back up, and it's the obvious step toward anything more interesting than pure obstacle avoidance.
