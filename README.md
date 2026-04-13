@@ -1,6 +1,5 @@
-# Autonomous Mobile Robot (AMR) Platform
+# Autonomous Mobile Robot (AMR)
 
-A firmware engineering project implementing **reactive autonomous navigation** and **3-DOF manipulation** on a differential-drive chassis. Developed in C++ for the ATmega328P (Arduino Uno), this system integrates ultrasonic time-of-flight sensing with PWM motor control to execute real-time collision avoidance.
+An embedded systems project built around the ATmega328P (Arduino Uno), combining autonomous obstacle avoidance with a 3-servo manipulator on a differential-drive chassis. The firmware, written in C++, handles ultrasonic sensing, PWM motor control through an H-bridge driver, and a hardcoded pick-and-place routine for the arm.
 
-📄 **Documentation:**
-For a complete engineering breakdown, including hardware architecture, pin mapping, and finite state machine logic, refer to the **[Technical Project Overview](PROJECT_OVERVIEW.md)**.
+📄 **Documentation:** For the full engineering breakdown - hardware architecture, pin mapping, and control logic - see the **[Technical Project Overview](PROJECT_OVERVIEW.md)**.
