@@ -37,22 +37,27 @@ The goal was to get comfortable writing firmware that talks to real hardware, su
 
 ### Obstacle Avoidance
 
-The main loop pings the ultrasonic sensor every cycle — a 10 µs trigger pulse, then measure the echo and convert to distance. From there it's a simple state check:
+The main loop pings the ultrasonic sensor every cycle: a 10 µs trigger pulse, then measures the echo and converts it to distance. From there, it's a simple state check:
 
 - **Distance > 25 cm:** drive forward.
 - **Distance < 25 cm:** cut PWM to 0 and stop.
 - **Distance < 15 cm:** back up briefly, then do a differential turn (left motors reverse, right motors forward) until the path is clear again.
 
-Not fancy, but it handles an obstacle course reliably.
-
 ### Arm Control
 
-The arm runs a hardcoded pick-and-place sequence. I manually tuned the PWM values for each servo's "home," "grip," and "drop" positions so the arm wouldn't fight itself or stall at the end of travel.
+The arm runs a hardcoded pick-and-place sequence where I manually tuned the PWM values for each servo's "home," "grip," and "drop" positions so the arm wouldn't fight itself or stall at the end of each travel.
 
-## What I Ran Into
+## Issues I Ran Into
 
-The ultrasonic sensor was noisy at first — it kept returning garbage distances, especially when pointed at soft or angled surfaces where the sound scatters instead of reflecting cleanly. I fixed it by isolating the sensor physically from the chassis (it was picking up vibration) and tightening up the trigger timing so I wasn't catching leftover echoes from the previous ping.
+The ultrasonic sensor was noisy at first because it kept returning garbage distances, especially when pointed at soft or angled surfaces where the sound scatters instead of reflecting cleanly. I fixed it by isolating the sensor physically from the chassis (it was picking up vibration) and tightening up the trigger timing so I was not catching leftover echoes from the previous ping.
 
-## What I'd Change
+## Future Improvements
 
-The whole thing is built around `delay()`, which blocks the entire program while it runs. That's fine for a simple reactive robot, but it means the Uno can't do anything else — no watching the sensor while the arm moves, no overlapping behaviors. Rewriting the loop around `millis()` timers would be the first thing I'd do if I picked this back up, and it's the obvious step toward anything more interesting than pure obstacle avoidance.
+The current firmware is built around `delay()`, which blocks execution for the duration of every call. This works for a purely reactive robot with one active behaviour at a time, but it prevents any form of concurrency, where the sensor can't be polled while the arm is moving, and behaviours can't overlap or interrupt each other.
+
+The next iteration would replace the blocking structure with a `millis()`-based scheduler, allowing the main loop to interleave sensing, locomotion, and manipulation. This is a prerequisite for anything beyond reactive avoidance: sensor fusion, path planning, or coordinated navigation and pick-and-place routines.
+
+Additional improvements worth exploring:
+- **Sensor filtering:** a running median or Kalman filter on the ultrasonic readings to further reduce false triggers.
+- **Closed-loop motor control:** adding wheel encoders for odometry and PID speed regulation, rather than open-loop PWM.
+- **Modular firmware architecture:** separating sensing, control, and actuation into discrete modules with clean interfaces, making the codebase easier to extend.
