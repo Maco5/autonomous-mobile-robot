@@ -47,7 +47,7 @@ The main loop pings the ultrasonic sensor every cycle: a 10 µs trigger pulse, t
 
 The arm runs a hardcoded pick-and-place sequence where I manually tuned the PWM values for each servo's "home," "grip," and "drop" positions so the arm wouldn't fight itself or stall at the end of each travel.
 
-## Issues I Ran Into
+## Challenges
 
 The ultrasonic sensor was noisy at first because it kept returning garbage distances, especially when pointed at soft or angled surfaces where the sound scatters instead of reflecting cleanly. I fixed it by isolating the sensor physically from the chassis (it was picking up vibration) and tightening up the trigger timing so I was not catching leftover echoes from the previous ping.
 
